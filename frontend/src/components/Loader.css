@@ -1,0 +1,25 @@
+/* Loader.css */
+.loader {
+    transform: rotateX(70deg);
+  }
+  
+  .loader .element {
+    display: block;
+    border-left: 5px solid rgb(47, 128, 255);
+    border-right: 5px solid rgb(47, 128, 255);
+    border-top: dotted 2px rgb(5, 92, 204);
+    width: 5rem;
+    height: 0.75rem;
+    margin-top: 0.25rem;
+    margin-left: 350px;
+    perspective: 1000px;
+    animation: rotate 5s infinite linear;
+    animation-delay: calc(var(--i) * 0.2s);
+  }
+  
+  @keyframes rotate {
+    100% {
+      transform: rotateY(360deg);
+    }
+  }
+  
