@@ -1,18 +1,49 @@
-from flask import Flask, request, jsonify
+import requests
+import os
 import numpy as np
 import cv2
 import joblib
-import os
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from frontend
 
-# Load the trained model
+# Google Drive file ID extracted from the link
+file_id = "1zRS2cP562T28-QjxbO5uZR-BFXV3R7YH"  # Extracted from the shared link
 model_path = "model.pkl"
-if not os.path.exists(model_path):
-    raise FileNotFoundError("Model file not found. Train and save the model first.")
 
+# Function to download model from Google Drive
+def download_model(file_id, model_path):
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    response = requests.get(url, stream=True)
+    
+    if "Content-Disposition" not in response.headers:
+        print("Google Drive security check detected. Manual download may be needed.")
+        return False
+    
+    total_size = int(response.headers.get("content-length", 0))
+    downloaded_size = 0
+
+    with open(model_path, "wb") as f:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+                downloaded_size += len(chunk)
+                percent_complete = (downloaded_size / total_size) * 100
+                print(f"\rDownloading Model: {percent_complete:.2f}% complete", end="")
+
+    print("\nModel downloaded successfully!")
+    return True
+
+# Check if model exists, else download it
+if not os.path.exists(model_path):
+    print("Model file not found. Downloading...")
+    success = download_model(file_id, model_path)
+    if not success:
+        raise FileNotFoundError("Model download failed. Please check the link or download manually.")
+
+# Load the model
 model = joblib.load(model_path)
 
 # Preprocessing function
